@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableHighlight, Alert, ToastAndroid, TouchableOpacity, StyleSheet, Modal, TouchableWithoutFeedback } from 'react-native';
 import { Avatar } from 'react-native-paper';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import ProfileImageStyle from '../styles/ProfileImageStyle';
 
 export default function ProfileImage() {
   const [pic, setPic] = useState('');
@@ -42,7 +43,7 @@ export default function ProfileImage() {
       setNotifyMsg('Permission is not satisfied');
     } else if (response.errorCode === 'others') {
       setNotifyMsg(response.errorMessage);
-    } else if (response.assets && response.assets[0].fileSize > 2097152) {
+    } else if (response.assets && response.assets[0].fileSize > 3097152) {
       Alert.alert(
         'Maximum image size exceeded',
         'Please choose an image under 2 MB',
@@ -67,34 +68,34 @@ export default function ProfileImage() {
 
   return (
     <View>
-      <View style={styles.centerContent}>
+      <View style={ProfileImageStyle.centerContent}>
         <TouchableOpacity onPress={openModal} underlayColor='rgba(0,0,0,0)'>
           <Avatar.Image size={150}
             source={{ uri: 'data:image/png;base64,' + pic }}
           />
         </TouchableOpacity>
       </View>
-      <View style={styles.btnContainer}>
+      <View style={ProfileImageStyle.btnContainer}>
         {/* <TouchableOpacity style={styles.btnStyle} onPress={handleImageResponse}>
           <Text style={styles.btnText}>Upload Image</Text>
         </TouchableOpacity> */}
-        <TouchableOpacity style={styles.btnStyle} onPress={removeImage}>
-          <Text style={styles.btnText}>Remove Image</Text>
+        <TouchableOpacity style={ProfileImageStyle.btnStyle} onPress={removeImage}>
+          <Text style={ProfileImageStyle.btnText}>Remove Image</Text>
         </TouchableOpacity>
       </View>
 
       <Modal visible={modalVisible} animationType='slide' transparent>
         <TouchableWithoutFeedback onPress={closeModal}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
+          <View style={ProfileImageStyle.modalContainer}>
+            <View style={ProfileImageStyle.modalContent}>
               <TouchableOpacity onPress={takePhoto}>
-                <Text style={styles.modalOption}>Take a Photo</Text>
+                <Text style={ProfileImageStyle.modalOption}>Take a Photo</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={chooseFromGallery}>
-                <Text style={styles.modalOption}>Choose from Gallery</Text>
+                <Text style={ProfileImageStyle.modalOption}>Choose from Gallery</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={closeModal}>
-                <Text style={styles.modalOption}>Cancel</Text>
+                <Text style={ProfileImageStyle.modalOption}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -104,43 +105,3 @@ export default function ProfileImage() {
   );
 }
 
-const styles = StyleSheet.create({
-  btnText: {
-    color: 'white',
-    fontWeight: '800',
-    alignSelf: 'center',
-    top: 7,
-  },
-  btnStyle: {
-    backgroundColor: 'gray',
-    height: 35,
-    width: '30%',
-    borderRadius: 5,
-  },
-  btnContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 40,
-  },
-  centerContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    width: '80%',
-  },
-  modalOption: {
-    fontSize: 18,
-    marginBottom: 15,
-  },
-});
