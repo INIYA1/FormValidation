@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import weekTimePickerStyle from '../styles/weekTimePickerStyle';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 const btnType = (btnName, onPress) => {
   return (
@@ -13,59 +14,98 @@ const btnType = (btnName, onPress) => {
 export default function DateAndTimePicker() {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  const [selectedButton, setSelectedButton] = useState(null);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [showNewCard, setShowNewCard] = useState(false);
-  const [cardCount, setCardCount] = useState(0); // Track the number of cards
+  const [cardCounts, setCardCounts] = useState({});
+  const [selectedTime,setselectedTime] =useState('')
+  
 
   const handleButtonPress = (day) => {
-    setSelectedButton(day);
+    setSelectedDay(day);
     setShowNewCard(false);
   };
 
-  const handleAddButtonPress = () => {
+  const addButtonPress = () => {
     setShowNewCard(true);
-    setCardCount((prevCount) => prevCount + 1); // Increase the card count by 1
+    setCardCounts((prevCounts) => ({
+      ...prevCounts,
+      [selectedDay]: (prevCounts[selectedDay] || 0) + 1,
+    }));
+  };
+
+  const deletebuttonPress = () => {
+    setCardCounts((prevCounts) => ({
+      ...prevCounts,
+      [selectedDay]: prevCounts[selectedDay] - 1,
+    }));
   };
 
   const renderCard = () => {
-    if (!selectedButton) return null;
+    if (!selectedDay) return null;
 
     return (
       <View>
-        <Text>{selectedButton}</Text>
+        <Text style={weekTimePickerStyle.dayText}>{selectedDay} :</Text>
         <View style={weekTimePickerStyle.btnTypeContainer}>
-          {btnType('ADD', handleAddButtonPress)}
+          {btnType('ADD', addButtonPress)}
           {btnType('SUBMIT')}
         </View>
       </View>
     );
   };
+//-----------------TIME PICKER-----------------
+
+  const showTimePicker = () => {
+    setTimePickerVisibility(true);
+  };
+
+  const hideTimePicker = () => {
+    setTimePickerVisibility(false);
+  };
+
+  const handleConfirm = (time) => {
+console.log(time,"TIME")
+    setselectedTime(time.toLocaleTimeString());
+    hideTimePicker();
+  };
+
+  const timeSetting = (selectTime) => {
+    return (
+      <View>
+        <Text style={weekTimePickerStyle.timeText}>{selectTime}</Text>
+        <TouchableOpacity style={weekTimePickerStyle.timeLabel} onPress={showTimePicker}>
+        <Text>{selectedTime}</Text>
+        </TouchableOpacity>
+      </View>
+    )
+  }
 
   const renderNewCard = () => {
     return (
-      <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginTop: 35 }}>
-        <View>
-          <Text>StartTime</Text>
-          <Text style={{ backgroundColor: 'white', color: 'black', marginTop: 20, height: 30, width: 90, borderRadius: 5 }}>12.00</Text>
-        </View>
-        <View>
-          <Text>StartTime</Text>
-          <Text style={{ backgroundColor: 'white', color: 'black', marginTop: 20, height: 30, width: 90, borderRadius: 5 }}>12.00</Text>
-        </View>
-        <TouchableOpacity>
-          <Text style={{ marginTop: 40, fontSize: 18, backgroundColor: 'white', borderRadius: 100, borderWidth: 1, color: 'red', borderColor: 'red', fontWeight: 'bold' }}>  X  </Text>
+      <View style={weekTimePickerStyle.timeContainer}>
+        {timeSetting('Start Time')}
+        {timeSetting('End Time')}
+        <DateTimePickerModal
+          isVisible={isTimePickerVisible}
+          mode="time"
+          onConfirm={handleConfirm}
+          onCancel={hideTimePicker}
+        />
+        <TouchableOpacity onPress={deletebuttonPress}>
+          <Text style={weekTimePickerStyle.delText}> X </Text>
         </TouchableOpacity>
       </View>
     );
   };
 
   const renderNewCards = () => {
+    if (!selectedDay || !cardCounts[selectedDay]) return null;
+
     const newCards = [];
-
-    for (let i = 0; i < cardCount; i++) {
-      newCards.push(renderNewCard());
+    for (let i = 0; i < cardCounts[selectedDay]; i++) {
+      newCards.push(renderNewCard(selectedDay));
     }
-
     return newCards;
   };
 
@@ -73,75 +113,18 @@ export default function DateAndTimePicker() {
     <View style={weekTimePickerStyle.container}>
       <View style={weekTimePickerStyle.list}>
         {days.map((day, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              weekTimePickerStyle.btnStyle,
-              selectedButton === day && weekTimePickerStyle.btnStyleSelected,
-            ]}
-            onPress={() => handleButtonPress(day)}
-          >
-            <Text
-              style={[
-                weekTimePickerStyle.btnText,
-                selectedButton === day && weekTimePickerStyle.btnSelectedText,
-              ]}
-            >
-              {day}
-            </Text>
-          </TouchableOpacity>
+          <View>
+            <TouchableOpacity
+              key={index}
+              style={[weekTimePickerStyle.btnStyle, selectedDay === day && weekTimePickerStyle.btnStyleSelected]}
+              onPress={() => handleButtonPress(day)}>
+              <Text style={[weekTimePickerStyle.btnText, selectedDay === day && weekTimePickerStyle.btnSelectedText]}>{day}</Text>
+            </TouchableOpacity>
+          </View>
         ))}
       </View>
       {renderCard()}
-      {showNewCard && renderNewCards()}
+      <ScrollView>{showNewCard && renderNewCards()}</ScrollView>
     </View>
   );
 }
-
-
-
-
-// _____________________________________________________________________________________________________________________________________________________________________________________
-// // import React, { useState } from 'react';
-// // import { View, Text, TouchableOpacity } from 'react-native';
-// // import weekTimePickerStyle from '../styles/weekTimePickerStyle';
-
-
-// // const btnType = (btnName) => {
-//   return (
-//     <TouchableOpacity style={weekTimePickerStyle.btnTypeStyle}>
-//       <Text style={weekTimePickerStyle.btnTypeText}>{btnName}</Text>
-//     </TouchableOpacity>
-//   )
-// }
-
-// export default function DateAndTimePicker() {
-//   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-//   const [selectedButton, setSelectedButton] = useState(null);
-
-//   const renderDaysContent = () => {
-//     return selectedButton ? (
-//       <View  style={{marginTop:10}}>
-//         <Text>{selectedButton}</Text>
-//         <View style={weekTimePickerStyle.btnTypeContainer}>
-//           {btnType("ADD")}
-//           {btnType("SUMIT")}
-//         </View>
-//       </View>
-//     ) : null
-//   };
-
-//   return (
-//     <View style={weekTimePickerStyle.container}>
-//       <View style={weekTimePickerStyle.list}>
-//         {days.map((day, index) => (
-//           <TouchableOpacity key={index} style={[weekTimePickerStyle.btnStyle, selectedButton === day && weekTimePickerStyle.btnStyleSelected,]} onPress={() => setSelectedButton(day)}>
-//             <Text style={[weekTimePickerStyle.btnText, selectedButton === day && weekTimePickerStyle.btnSelectedText,]}>{day}</Text>
-//           </TouchableOpacity>
-//         ))}
-//       </View>
-//       {renderDaysContent()}
-//     </View>
-//   );
-// }
